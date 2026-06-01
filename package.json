@@ -1,0 +1,31 @@
+{
+  "name": "agents-playground",
+  "version": "0.0.1",
+  "description": "Weather Dashboard app, a polished Next.js app that displays current conditions and a short forecast for a chosen city using either OpenWeatherMap API. Key features: city search, display current weather and 3-day forecast, save a list of favorite cities.",
+  "homepage": "https://github.com/andriipugach/agents-playground#readme",
+  "bugs": {
+    "url": "https://github.com/andriipugach/agents-playground/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andriipugach/agents-playground.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.5.0",
+    "@prisma/client": "^7.8.0",
+    "next": "^16.2.7",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "prisma": "^7.8.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}
