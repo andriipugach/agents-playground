@@ -18,6 +18,12 @@ A Weather Dashboard built with Next.js. The app lets users search for a city, vi
 - `npm run dev` - start local development server
 - `npm run build` - production build validation
 - `npm run start` - run built app
+- `npm run lint` - run ESLint checks
+- `npm run lint:fix` - run ESLint with autofixes
+- `npm run lint-staged` - run staged-file lint/format rules
+- `npm run format` - format the repository with Prettier
+- `npm run format:check` - verify Prettier formatting
+- `npm run prepare` - install Husky git hooks
 - `npm test` - run Vitest with coverage
 - `npm run test:watch` - watch mode for tests
 
@@ -41,6 +47,11 @@ A Weather Dashboard built with Next.js. The app lets users search for a city, vi
 - `MSW` (`msw` `2`) for stable API mocking in tests
 - `Zod` `4` for strict schema validation and runtime-safe parsing
 - `Prisma` dependencies are installed and schema is included for future DB-backed favorites; current local favorites persistence uses a JSON file at `data/favorites.json`
+
+## Git Hooks
+
+- Husky is configured with a `pre-commit` hook.
+- The hook runs `lint-staged`, which applies ESLint + Prettier to staged files before commit.
 
 ## Deployment and Hosting
 

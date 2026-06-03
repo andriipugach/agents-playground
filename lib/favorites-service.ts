@@ -41,7 +41,7 @@ export const createFavoritesService = (repository: FavoritesRepository): Favorit
       return toDto(row);
     } catch (error) {
       if (error instanceof Error && /duplicate/i.test(error.message)) {
-        throw new Error("City already in favorites");
+        throw new Error("City already in favorites", { cause: error });
       }
 
       throw error;

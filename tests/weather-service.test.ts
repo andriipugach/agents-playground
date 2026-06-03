@@ -23,7 +23,13 @@ describe("fetchWeatherByCity", () => {
   });
 
   test("throws fallback message when forecast endpoint fails", async () => {
-    server.use(http.get("https://api.openweathermap.org/data/2.5/forecast", () => HttpResponse.json({ message: "down" }, { status: 500 })));
-    await expect(fetchWeatherByCity("London")).rejects.toThrow("Unable to fetch weather data right now");
+    server.use(
+      http.get("https://api.openweathermap.org/data/2.5/forecast", () =>
+        HttpResponse.json({ message: "down" }, { status: 500 }),
+      ),
+    );
+    await expect(fetchWeatherByCity("London")).rejects.toThrow(
+      "Unable to fetch weather data right now",
+    );
   });
 });

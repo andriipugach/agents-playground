@@ -53,4 +53,3 @@ This file defines repository-specific guidance for AI coding agents working in `
 - Never commit secrets, tokens, or environment credentials.
 - Do not run destructive git operations unless explicitly requested.
 - Do not modify unrelated files "for cleanup" without user request.
-

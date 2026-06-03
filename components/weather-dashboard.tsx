@@ -33,7 +33,13 @@ export const WeatherDashboard = ({
 
       <form onSubmit={submitSearch} className="search-row">
         <label htmlFor="city">City</label>
-        <input id="city" name="city" value={city} onChange={(event) => setCity(event.target.value)} placeholder="Search city" />
+        <input
+          id="city"
+          name="city"
+          value={city}
+          onChange={(event) => setCity(event.target.value)}
+          placeholder="Search city"
+        />
         <button type="submit">Search</button>
       </form>
 

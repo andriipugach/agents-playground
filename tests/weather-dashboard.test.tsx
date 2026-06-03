@@ -15,9 +15,24 @@ const weather: WeatherSnapshot = {
     iconUrl: "https://openweathermap.org/img/wn/01d@2x.png",
   },
   forecast: [
-    { date: "2026-06-04", temperatureC: 21.2, description: "few clouds", iconUrl: "https://openweathermap.org/img/wn/02d@2x.png" },
-    { date: "2026-06-05", temperatureC: 20.1, description: "light rain", iconUrl: "https://openweathermap.org/img/wn/10d@2x.png" },
-    { date: "2026-06-06", temperatureC: 19.3, description: "scattered clouds", iconUrl: "https://openweathermap.org/img/wn/03d@2x.png" },
+    {
+      date: "2026-06-04",
+      temperatureC: 21.2,
+      description: "few clouds",
+      iconUrl: "https://openweathermap.org/img/wn/02d@2x.png",
+    },
+    {
+      date: "2026-06-05",
+      temperatureC: 20.1,
+      description: "light rain",
+      iconUrl: "https://openweathermap.org/img/wn/10d@2x.png",
+    },
+    {
+      date: "2026-06-06",
+      temperatureC: 19.3,
+      description: "scattered clouds",
+      iconUrl: "https://openweathermap.org/img/wn/03d@2x.png",
+    },
   ],
 };
 
@@ -26,7 +41,16 @@ describe("WeatherDashboard", () => {
     const user = userEvent.setup();
     const onSearch = vi.fn().mockResolvedValue(undefined);
 
-    render(<WeatherDashboard weather={weather} favorites={[]} onSearch={onSearch} onAddFavorite={vi.fn()} onRemoveFavorite={vi.fn()} error={null} />);
+    render(
+      <WeatherDashboard
+        weather={weather}
+        favorites={[]}
+        onSearch={onSearch}
+        onAddFavorite={vi.fn()}
+        onRemoveFavorite={vi.fn()}
+        error={null}
+      />,
+    );
 
     await user.type(screen.getByLabelText("City"), "Kyiv");
     await user.click(screen.getByRole("button", { name: "Search" }));

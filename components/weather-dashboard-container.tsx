@@ -29,6 +29,8 @@ export const WeatherDashboardContainer = () => {
   };
 
   useEffect(() => {
+    // Initial sync on mount; updates occur after async fetch completion.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadFavorites();
   }, []);
 
@@ -72,5 +74,14 @@ export const WeatherDashboardContainer = () => {
     await loadFavorites();
   };
 
-  return <WeatherDashboard weather={weather} favorites={favorites} error={error} onSearch={onSearch} onAddFavorite={onAddFavorite} onRemoveFavorite={onRemoveFavorite} />;
+  return (
+    <WeatherDashboard
+      weather={weather}
+      favorites={favorites}
+      error={error}
+      onSearch={onSearch}
+      onAddFavorite={onAddFavorite}
+      onRemoveFavorite={onRemoveFavorite}
+    />
+  );
 };

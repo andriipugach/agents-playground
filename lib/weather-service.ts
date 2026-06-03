@@ -28,7 +28,8 @@ const forecastResponseSchema = z.object({
   ),
 });
 
-const toIconUrl = (iconCode: string): string => `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+const toIconUrl = (iconCode: string): string =>
+  `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
 
 const getApiKey = (): string => process.env.OPENWEATHER_API_KEY ?? "test-api-key";
 
@@ -50,8 +51,12 @@ export const fetchWeatherByCity = async (city: string): Promise<WeatherSnapshot>
   const apiKey = getApiKey();
 
   const [currentResponse, forecastResponse] = await Promise.all([
-    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodedCity}&appid=${apiKey}&units=metric`),
-    fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodedCity}&appid=${apiKey}&units=metric`),
+    fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${encodedCity}&appid=${apiKey}&units=metric`,
+    ),
+    fetch(
+      `https://api.openweathermap.org/data/2.5/forecast?q=${encodedCity}&appid=${apiKey}&units=metric`,
+    ),
   ]);
 
   if (!currentResponse.ok) {

@@ -11,9 +11,21 @@ const currentWeatherPayload = {
 
 const forecastPayload = {
   list: [
-    { dt_txt: "2026-06-04 12:00:00", main: { temp: 21.2 }, weather: [{ description: "few clouds", icon: "02d" }] },
-    { dt_txt: "2026-06-05 12:00:00", main: { temp: 20.1 }, weather: [{ description: "light rain", icon: "10d" }] },
-    { dt_txt: "2026-06-06 12:00:00", main: { temp: 19.3 }, weather: [{ description: "scattered clouds", icon: "03d" }] },
+    {
+      dt_txt: "2026-06-04 12:00:00",
+      main: { temp: 21.2 },
+      weather: [{ description: "few clouds", icon: "02d" }],
+    },
+    {
+      dt_txt: "2026-06-05 12:00:00",
+      main: { temp: 20.1 },
+      weather: [{ description: "light rain", icon: "10d" }],
+    },
+    {
+      dt_txt: "2026-06-06 12:00:00",
+      main: { temp: 19.3 },
+      weather: [{ description: "scattered clouds", icon: "03d" }],
+    },
   ],
 };
 
@@ -26,5 +38,7 @@ export const handlers = [
 
     return HttpResponse.json(currentWeatherPayload);
   }),
-  http.get("https://api.openweathermap.org/data/2.5/forecast", () => HttpResponse.json(forecastPayload)),
+  http.get("https://api.openweathermap.org/data/2.5/forecast", () =>
+    HttpResponse.json(forecastPayload),
+  ),
 ];
