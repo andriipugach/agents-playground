@@ -40,6 +40,7 @@ A Weather Dashboard built with Next.js. The app lets users search for a city, vi
 - `Next.js` `16`
 - `React` `19`
 - `Base UI` (`@base-ui/react` `1`)
+- `Recharts` `3` for forecast charts
 - `TypeScript` `6`
 - `Prisma ORM` (`prisma` + `@prisma/client` `7`)
 - `Vitest` `4` and `@vitest/coverage-v8` `4`
@@ -64,3 +65,11 @@ A Weather Dashboard built with Next.js. The app lets users search for a city, vi
 - Tests should use **MSW-based mocks** to avoid external API flakiness and ensure deterministic test behavior.
 - Parsing of external data must be **reliable and explicit** (schema-driven where possible).
 - Runtime behavior must prioritize **graceful failure handling**, including user-friendly error states and safe fallbacks.
+
+## UI Refresh Notes
+
+- The dashboard UI is built with **Base UI** (`@base-ui/react`) interactive primitives (`Field`, `Button`, `Meter`, `ScrollArea`) for accessible, headless controls.
+- Premium **hero + two-column dashboard** layout: search hero on top, current conditions and forecast in the main column, favorites in a sticky side panel that collapses to a single column on mobile.
+- **OpenWeatherMap condition icons** are rendered for current weather and each forecast day.
+- The 3-day forecast includes a **Recharts** gradient temperature-trend chart plus per-day cards, with humidity and wind shown as `Meter` bars.
+- A search loading state (`isSearching`) disables the button and shows a "Searching..." label while a request is in flight.
