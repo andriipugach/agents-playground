@@ -9,9 +9,9 @@ import {
 
 /**
  * Denylist-driven OpenWeatherMap handlers for the city-search scenario:
- * denylisted cities (e.g. Moscow) return the not-found suggestion error, and
- * every other city returns randomized-but-deterministic weather. The lookup is
- * applied to BOTH the current-weather and forecast endpoints.
+ * denylisted cities return the not-found suggestion error, and
+ * every other city returns randomized-but-deterministic weather.
+ * The lookup is applied to BOTH the current-weather and forecast endpoints.
  *
  * Installed per-test via `server.use(...)` so the repo's default allowlist
  * handlers stay untouched.

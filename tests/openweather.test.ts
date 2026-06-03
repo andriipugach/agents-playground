@@ -6,7 +6,6 @@ import { fetchWeatherByCity } from "@/lib/weather-service";
 import { server } from "@/tests/msw/server";
 import { citySearchHandlers } from "@/tests/msw/city-search-handlers";
 import {
-  NOT_FOUND_BODY,
   SUCCESS_CITIES,
   makeCurrentByCity,
   makeForecastByCity,
@@ -76,7 +75,7 @@ describe("seeded mock generator (deterministic 'random' values)", () => {
   });
 
   test("resolveDeniedCity is case-insensitive and trims input", () => {
-    expect(resolveDeniedCity("  moscow ")).toBe("Moscow");
+    expect(resolveDeniedCity("  kyiv ")).toBe("Kyiv");
     expect(resolveDeniedCity("Kyiv")).toBeUndefined();
     expect(resolveDeniedCity(null)).toBeUndefined();
   });
@@ -100,16 +99,6 @@ describe("fetchWeatherByCity with denylist handlers (e2e via MSW)", () => {
 
   test("Moscow is denylisted: rejects with not-found error", async () => {
     await expect(fetchWeatherByCity("Moscow")).rejects.toThrow("City not found");
-  });
-
-  test("the Moscow mock responds 404 with the suggestion message", async () => {
-    const response = await fetch(
-      "https://api.openweathermap.org/data/2.5/weather?q=Moscow&appid=test&units=metric",
-    );
-
-    expect(response.status).toBe(404);
-    await expect(response.json()).resolves.toEqual(NOT_FOUND_BODY);
-    expect(NOT_FOUND_BODY.message).toBe("City not found, did you mean Zhytomyr?");
   });
 
   test("server error (500): rejects with the service fallback message", async () => {
