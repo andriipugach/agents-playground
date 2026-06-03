@@ -2,6 +2,33 @@
 
 A Weather Dashboard built with Next.js. The app lets users search for a city, view current weather conditions with a 3-day forecast, and save favorite cities. Weather data is provided via the OpenWeatherMap API.
 
+## Local Development
+
+1. Install dependencies:
+   - `npm install`
+2. Create local environment file (already ignored by git):
+   - `cp .env.example .env.local`
+   - Set `OPENWEATHER_API_KEY` in `.env.local`
+3. Start the app:
+   - `npm run dev`
+4. Open [http://localhost:3000](http://localhost:3000)
+
+## Available Scripts
+
+- `npm run dev` - start local development server
+- `npm run build` - production build validation
+- `npm run start` - run built app
+- `npm test` - run Vitest with coverage
+- `npm run test:watch` - watch mode for tests
+
+## Features
+
+- City search against OpenWeatherMap current weather API.
+- Current conditions panel with temperature, humidity, wind speed, and status.
+- 3-day forecast from OpenWeatherMap forecast endpoint.
+- Favorites list with add/load/remove actions.
+- Graceful fallback errors for invalid city and upstream failures.
+
 ## Tech Stack
 
 - `Next.js` `16`
@@ -13,7 +40,7 @@ A Weather Dashboard built with Next.js. The app lets users search for a city, vi
 - `Testing Library` (`@testing-library/react` `16`, `@testing-library/jest-dom` `6`, `@testing-library/user-event` `14`)
 - `MSW` (`msw` `2`) for stable API mocking in tests
 - `Zod` `4` for strict schema validation and runtime-safe parsing
-- `ESLint` `10`, `eslint-config-next` `16`, and `Prettier` `3`
+- `Prisma` dependencies are installed and schema is included for future DB-backed favorites; current local favorites persistence uses a JSON file at `data/favorites.json`
 
 ## Deployment and Hosting
 
