@@ -45,8 +45,6 @@ This file defines repository-specific guidance for AI coding agents working in `
 ## Documentation and Logs
 
 - Keep high-signal project docs current (`README.md` and related docs).
-- When work involves meaningful AI-assisted decisions, log it under:
-  - `docs/ai-interaction-logs/YYYY-MM-DD.md`
 
 ## Safety and Boundaries
 
