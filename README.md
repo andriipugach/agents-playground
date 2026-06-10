@@ -9,6 +9,7 @@ A Weather Dashboard built with Next.js. The app lets users search for a city, vi
 2. Create local environment file (already ignored by git):
    - `cp .env.example .env.local`
    - Set `OPENWEATHER_API_KEY` in `.env.local`
+   - Set `DATABASE_URL` to a PostgreSQL connection string, such as a Neon database URL
 3. Start the app:
    - `npm run dev`
 4. Open [http://localhost:3000](http://localhost:3000)
@@ -28,6 +29,9 @@ Leave the flag unset or `false` to use the real API.
 - `npm run lint-staged` - run staged-file lint/format rules
 - `npm run format` - format the repository with Prettier
 - `npm run format:check` - verify Prettier formatting
+- `npm run prisma:generate` - generate Prisma Client
+- `npm run prisma:migrate:deploy` - apply committed Prisma migrations to the configured database
+- `npm run prisma:push` - push the Prisma schema directly to the configured database
 - `npm run prepare` - install Husky git hooks
 - `npm test` - run Vitest with coverage
 - `npm run test:watch` - watch mode for tests
@@ -63,6 +67,25 @@ Leave the flag unset or `false` to use the real API.
 
 - **Frontend/App hosting:** Vercel
 - **Database hosting:** Neon (EU Central region)
+
+### GitHub Actions Deployments
+
+Deployment environment variables are managed as GitHub repository secrets. Configure these secrets in **GitHub repo settings > Secrets and variables > Actions** before running the workflows:
+
+- `VERCEL_TOKEN` - Vercel access token used by the Vercel CLI
+- `VERCEL_ORG_ID` - Vercel team/user org ID
+- `VERCEL_PROJECT_ID` - Vercel project ID
+- `NEON_DATABASE_URL` - Neon PostgreSQL connection string used for Prisma migrations and runtime database access
+- `OPENWEATHER_API_KEY` - OpenWeatherMap API key used by the deployed app
+- `WEATHER_USE_MOCKS` - optional, defaults to `false` when unset
+
+Three deployment workflows are available:
+
+- `Deploy App` (`.github/workflows/deploy-app.yml`) - manually deploys only the Next.js app to Vercel.
+- `Deploy DB` (`.github/workflows/deploy-db.yml`) - manually applies Prisma migrations to Neon with `prisma migrate deploy`.
+- `Deploy App and DB` (`.github/workflows/deploy-all.yml`) - runs on pushes to `main` and can also be started manually; it deploys DB migrations first, then deploys the app.
+
+The workflows use Node.js `26.x`. If GitHub-hosted runners do not have Node 26 available for a given run, change `NODE_VERSION` in the workflow files to the current supported LTS version.
 
 ## Non-Functional Requirements
 

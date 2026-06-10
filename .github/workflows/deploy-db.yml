@@ -1,0 +1,44 @@
+name: Deploy DB
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    secrets:
+      NEON_DATABASE_URL:
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "26.x"
+  DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+
+jobs:
+  deploy-db:
+    name: Run Prisma migrations on Neon
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run prisma:generate
+
+      - name: Run database migrations
+        run: npm run prisma:migrate:deploy
+
+      - name: Summarize migration deployment
+        run: |
+          echo "### Neon migration deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "Prisma migrations were applied with \`prisma migrate deploy\`." >> "$GITHUB_STEP_SUMMARY"

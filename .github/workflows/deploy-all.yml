@@ -1,0 +1,22 @@
+name: Deploy App and DB
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-db:
+    name: Deploy database
+    uses: ./.github/workflows/deploy-db.yml
+    secrets: inherit
+
+  deploy-app:
+    name: Deploy application
+    needs: deploy-db
+    uses: ./.github/workflows/deploy-app.yml
+    secrets: inherit

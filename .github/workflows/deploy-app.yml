@@ -1,0 +1,88 @@
+name: Deploy App
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    secrets:
+      VERCEL_TOKEN:
+        required: true
+      VERCEL_ORG_ID:
+        required: true
+      VERCEL_PROJECT_ID:
+        required: true
+      NEON_DATABASE_URL:
+        required: true
+      OPENWEATHER_API_KEY:
+        required: true
+      WEATHER_USE_MOCKS:
+        required: false
+    outputs:
+      deployment-url:
+        description: Vercel deployment URL
+        value: ${{ jobs.deploy-app.outputs.deployment-url }}
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "26.x"
+  DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+  OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+  WEATHER_USE_MOCKS: ${{ secrets.WEATHER_USE_MOCKS || 'false' }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy-app:
+    name: Build and deploy Next.js app
+    runs-on: ubuntu-latest
+    outputs:
+      deployment-url: ${{ steps.deploy.outputs.deployment-url }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run prisma:generate
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel
+
+      - name: Configure Vercel project
+        run: |
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+
+      - name: Build Vercel artifact
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Vercel artifact
+        id: deploy
+        run: |
+          deployment_url="$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" \
+            --env OPENWEATHER_API_KEY="$OPENWEATHER_API_KEY" \
+            --env DATABASE_URL="$DATABASE_URL" \
+            --env WEATHER_USE_MOCKS="$WEATHER_USE_MOCKS")"
+          echo "deployment-url=$deployment_url" >> "$GITHUB_OUTPUT"
+          echo "### Vercel deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "$deployment_url" >> "$GITHUB_STEP_SUMMARY"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
