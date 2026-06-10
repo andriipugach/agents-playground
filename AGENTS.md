@@ -5,7 +5,7 @@ This file defines repository-specific guidance for AI coding agents working in `
 ## Project Overview
 
 - Product: Weather Dashboard built with Next.js.
-- Primary goals: city search, current conditions, 3-day forecast, favorites.
+- Primary goals: city search, current conditions, 5-day forecast, favorites.
 - External dependency: OpenWeatherMap API data.
 - Stack: Next.js 16, React 19, TypeScript, Prisma, Vitest, MSW, Zod.
 

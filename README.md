@@ -1,6 +1,6 @@
 # agents-playground
 
-A Weather Dashboard built with Next.js. The app lets users search for a city, view current weather conditions with a 3-day forecast, and save favorite cities. Weather data is provided via the OpenWeatherMap API.
+A Weather Dashboard built with Next.js. The app lets users search for a city, view current weather conditions with a 5-day forecast, and save favorite cities. Weather data is provided via the OpenWeatherMap API.
 
 ## Local Development
 
@@ -36,7 +36,7 @@ Leave the flag unset or `false` to use the real API.
 
 - City search against OpenWeatherMap current weather API.
 - Current conditions panel with temperature, humidity, wind speed, and status.
-- 3-day forecast from OpenWeatherMap forecast endpoint.
+- 5-day forecast from OpenWeatherMap forecast endpoint.
 - Favorites list with add/load/remove actions.
 - Graceful fallback errors for invalid city and upstream failures.
 
@@ -76,5 +76,5 @@ Leave the flag unset or `false` to use the real API.
 - The dashboard UI is built with **Base UI** (`@base-ui/react`) interactive primitives (`Field`, `Button`, `Meter`, `ScrollArea`) for accessible, headless controls.
 - Premium **hero + two-column dashboard** layout: search hero on top, current conditions and forecast in the main column, favorites in a sticky side panel that collapses to a single column on mobile.
 - **OpenWeatherMap condition icons** are rendered for current weather and each forecast day.
-- The 3-day forecast includes a **Recharts** gradient temperature-trend chart plus per-day cards, with humidity and wind shown as `Meter` bars.
+- The 5-day forecast includes a **Recharts** gradient temperature-trend chart plus per-day cards, with humidity and wind shown as `Meter` bars.
 - A search loading state (`isSearching`) disables the button and shows a "Searching..." label while a request is in flight.

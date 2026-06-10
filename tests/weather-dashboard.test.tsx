@@ -10,8 +10,11 @@ vi.mock("recharts", async (importOriginal) => {
   const actual = await importOriginal<typeof import("recharts")>();
   return {
     ...actual,
-    ResponsiveContainer: ({ children }: { children: ReactElement }) =>
-      cloneElement(children, { width: 320, height: 200 }),
+    ResponsiveContainer: ({
+      children,
+    }: {
+      children: ReactElement<{ width?: number; height?: number }>;
+    }) => cloneElement(children, { width: 320, height: 200 }),
   };
 });
 
@@ -44,6 +47,18 @@ const weather: WeatherSnapshot = {
       description: "scattered clouds",
       iconUrl: "https://openweathermap.org/img/wn/03d@2x.png",
     },
+    {
+      date: "2026-06-07",
+      temperatureC: 18.4,
+      description: "overcast clouds",
+      iconUrl: "https://openweathermap.org/img/wn/04d@2x.png",
+    },
+    {
+      date: "2026-06-08",
+      temperatureC: 23.6,
+      description: "moderate rain",
+      iconUrl: "https://openweathermap.org/img/wn/10d@2x.png",
+    },
   ],
 };
 
@@ -72,7 +87,7 @@ describe("WeatherDashboard", () => {
     expect(screen.getByRole("heading", { name: "Current conditions" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Forecast insights" })).toBeInTheDocument();
     expect(screen.getByText("London, GB")).toBeInTheDocument();
-    expect(screen.getByLabelText("3-day temperature trend")).toBeInTheDocument();
+    expect(screen.getByLabelText("5-day temperature trend")).toBeInTheDocument();
   });
 
   test("renders condition and forecast weather icons from icon urls", () => {
@@ -98,6 +113,8 @@ describe("WeatherDashboard", () => {
     );
     expect(screen.getByAltText("light rain")).toBeInTheDocument();
     expect(screen.getByAltText("scattered clouds")).toBeInTheDocument();
+    expect(screen.getByAltText("overcast clouds")).toBeInTheDocument();
+    expect(screen.getByAltText("moderate rain")).toBeInTheDocument();
   });
 
   test("disables the search button while a search is in progress", () => {

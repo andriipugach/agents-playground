@@ -4,7 +4,7 @@ import "@/app/globals.css";
 
 export const metadata: Metadata = {
   title: "Weather Dashboard",
-  description: "Search city weather, view a 3-day forecast, and save favorites.",
+  description: "Search city weather, view a 5-day forecast, and save favorites.",
 };
 
 type RootLayoutProps = {

@@ -31,7 +31,13 @@ const CONDITIONS = [
 
 const COUNTRIES = ["UA", "FR", "JP", "DE", "US", "PL"] as const;
 
-const FORECAST_DATES = ["2026-06-04", "2026-06-05", "2026-06-06"] as const;
+const FORECAST_DATES = [
+  "2026-06-04",
+  "2026-06-05",
+  "2026-06-06",
+  "2026-06-07",
+  "2026-06-08",
+] as const;
 
 /** Deterministic 32-bit hash of a string, used to seed the PRNG. */
 const hashSeed = (value: string): number => {
@@ -78,7 +84,7 @@ export const makeCurrentByCity = (city: string): CurrentWeatherPayload => {
 };
 
 /**
- * Build a randomized-but-deterministic 3-day forecast payload for a city.
+ * Build a randomized-but-deterministic 5-day forecast payload for a city.
  * Two entries per day exercise the service's per-day de-duplication.
  */
 export const makeForecastByCity = (city: string): ForecastPayload => {
@@ -124,6 +130,16 @@ export const referenceForecast: ForecastPayload = {
       dt_txt: "2026-06-06 12:00:00",
       main: { temp: 19.3 },
       weather: [{ description: "scattered clouds", icon: "03d" }],
+    },
+    {
+      dt_txt: "2026-06-07 12:00:00",
+      main: { temp: 18.4 },
+      weather: [{ description: "overcast clouds", icon: "04d" }],
+    },
+    {
+      dt_txt: "2026-06-08 12:00:00",
+      main: { temp: 23.6 },
+      weather: [{ description: "moderate rain", icon: "10d" }],
     },
   ],
 };

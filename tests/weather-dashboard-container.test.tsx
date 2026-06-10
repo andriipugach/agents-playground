@@ -72,6 +72,29 @@ const jsonResponse = (payload: unknown, init?: ResponseInit) =>
     ...init,
   });
 
+const stubGeolocationSuccess = (latitude: number, longitude: number) => {
+  const getCurrentPosition = vi.fn((success: PositionCallback) => {
+    success({
+      coords: {
+        latitude,
+        longitude,
+        accuracy: 1,
+        altitude: null,
+        altitudeAccuracy: null,
+        heading: null,
+        speed: null,
+      },
+      timestamp: 0,
+    });
+  });
+
+  vi.stubGlobal("navigator", {
+    geolocation: { getCurrentPosition },
+  });
+
+  return getCurrentPosition;
+};
+
 describe("WeatherDashboardContainer", () => {
   let fetchMock: ReturnType<typeof vi.fn>;
 
@@ -105,6 +128,40 @@ describe("WeatherDashboardContainer", () => {
     await waitFor(() => {
       expect(getLatestProps().error).toBe(API_ERROR);
     });
+  });
+
+  test("loads the first favorite weather after favorites load", async () => {
+    const favorite = { id: 1, city: "Paris", createdAt: "2026-06-03T10:00:00.000Z" };
+    const parisWeather = { ...weatherSnapshot, city: "Paris", country: "FR" };
+
+    fetchMock.mockResolvedValueOnce(jsonResponse([favorite]));
+    fetchMock.mockResolvedValueOnce(jsonResponse(parisWeather));
+
+    render(<WeatherDashboardContainer />);
+
+    await waitFor(() => {
+      expect(getLatestProps().weather).toEqual(parisWeather);
+    });
+
+    expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/favorites");
+    expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/weather?city=Paris");
+  });
+
+  test("loads weather from browser location when there are no favorites", async () => {
+    const getCurrentPosition = stubGeolocationSuccess(50.45, 30.52);
+
+    fetchMock.mockResolvedValueOnce(jsonResponse([]));
+    fetchMock.mockResolvedValueOnce(jsonResponse(weatherSnapshot));
+
+    render(<WeatherDashboardContainer />);
+
+    await waitFor(() => {
+      expect(getLatestProps().weather).toEqual(weatherSnapshot);
+    });
+
+    expect(getCurrentPosition).toHaveBeenCalledOnce();
+    expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/favorites");
+    expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/weather/location?lat=50.45&lon=30.52");
   });
 
   test("onSearch shows fallback error when fetch rejects", async () => {
@@ -257,6 +314,7 @@ describe("WeatherDashboardContainer", () => {
     const favorite = { id: 7, city: "Kyiv", createdAt: "2026-06-03T00:00:00.000Z" };
 
     fetchMock.mockResolvedValueOnce(jsonResponse([favorite]));
+    fetchMock.mockResolvedValueOnce(jsonResponse(weatherSnapshot));
     fetchMock.mockRejectedValueOnce(new Error("network"));
 
     render(<WeatherDashboardContainer />);
@@ -278,6 +336,7 @@ describe("WeatherDashboardContainer", () => {
     const favorite = { id: 8, city: "Lviv", createdAt: "2026-06-03T00:00:00.000Z" };
 
     fetchMock.mockResolvedValueOnce(jsonResponse([favorite]));
+    fetchMock.mockResolvedValueOnce(jsonResponse(weatherSnapshot));
     fetchMock.mockResolvedValueOnce(
       jsonResponse({ message: API_ERROR }, { status: 500, statusText: "Server Error" }),
     );
@@ -301,6 +360,7 @@ describe("WeatherDashboardContainer", () => {
     const favorite = { id: 9, city: "Odesa", createdAt: "2026-06-03T00:00:00.000Z" };
 
     fetchMock.mockResolvedValueOnce(jsonResponse([favorite]));
+    fetchMock.mockResolvedValueOnce(jsonResponse(weatherSnapshot));
     fetchMock.mockResolvedValueOnce(jsonResponse({ ok: true }));
     fetchMock.mockResolvedValueOnce(jsonResponse([]));
 

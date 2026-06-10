@@ -72,7 +72,7 @@ export const WeatherDashboard = ({
           <p className="hero-eyebrow">Live conditions &amp; forecast</p>
           <h1>Weather Dashboard</h1>
           <p className="hero-sub">
-            Search any city to see current weather, a 3-day trend, and save your favorites.
+            Search any city to see current weather, a 5-day trend, and save your favorites.
           </p>
         </div>
 
@@ -174,10 +174,10 @@ export const WeatherDashboard = ({
               >
                 <header className="card-head">
                   <h2 id="forecast-heading">Forecast insights</h2>
-                  <span className="card-hint">Next 3 days</span>
+                  <span className="card-hint">Next 5 days</span>
                 </header>
 
-                <div className="forecast-chart" role="img" aria-label="3-day temperature trend">
+                <div className="forecast-chart" role="img" aria-label="5-day temperature trend">
                   <ResponsiveContainer width="100%" height={220}>
                     <AreaChart
                       data={chartData}
@@ -250,7 +250,7 @@ export const WeatherDashboard = ({
               </span>
               <h2>Find your city</h2>
               <p className="muted">
-                Search for a city above to see current conditions and a 3-day forecast.
+                Search for a city above to see current conditions and a 5-day forecast.
               </p>
             </section>
           )}

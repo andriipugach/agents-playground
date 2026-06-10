@@ -27,7 +27,7 @@ describe("normalizeWeather (pure parser)", () => {
       windSpeed: 3.2,
       iconUrl: toIconUrl("01d"),
     });
-    expect(result.forecast).toHaveLength(3);
+    expect(result.forecast).toHaveLength(5);
     expect(result.forecast[0]).toEqual({
       date: "2026-06-04",
       temperatureC: 21.2,
@@ -36,17 +36,19 @@ describe("normalizeWeather (pure parser)", () => {
     });
   });
 
-  test("de-duplicates forecast entries to one per day, capped at 3 days", () => {
+  test("de-duplicates forecast entries to one per day, capped at 5 days", () => {
     const forecast = makeForecastByCity("Kyiv");
     expect(forecast.list.length).toBeGreaterThan(3);
 
     const result = normalizeWeather(referenceCurrent, forecast);
 
-    expect(result.forecast).toHaveLength(3);
+    expect(result.forecast).toHaveLength(5);
     expect(result.forecast.map((day) => day.date)).toEqual([
       "2026-06-04",
       "2026-06-05",
       "2026-06-06",
+      "2026-06-07",
+      "2026-06-08",
     ]);
   });
 
@@ -94,7 +96,7 @@ describe("fetchWeatherByCity with denylist handlers (e2e via MSW)", () => {
     expect(typeof result.current.humidity).toBe("number");
     expect(typeof result.current.windSpeed).toBe("number");
     expect(result.current.iconUrl).toMatch(/openweathermap\.org/);
-    expect(result.forecast).toHaveLength(3);
+    expect(result.forecast).toHaveLength(5);
   });
 
   test("Moscow is denylisted: rejects with not-found error", async () => {

@@ -26,6 +26,16 @@ const forecastPayload = {
       main: { temp: 19.3 },
       weather: [{ description: "scattered clouds", icon: "03d" }],
     },
+    {
+      dt_txt: "2026-06-07 12:00:00",
+      main: { temp: 18.4 },
+      weather: [{ description: "overcast clouds", icon: "04d" }],
+    },
+    {
+      dt_txt: "2026-06-08 12:00:00",
+      main: { temp: 23.6 },
+      weather: [{ description: "moderate rain", icon: "10d" }],
+    },
   ],
 };
 

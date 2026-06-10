@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { WeatherDashboard } from "@/components/weather-dashboard";
 import type { FavoriteCity, WeatherSnapshot } from "@/lib/types";
 
@@ -21,42 +21,82 @@ export const WeatherDashboardContainer = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
 
-  const loadFavorites = async () => {
+  const loadWeatherFromUrl = useCallback(async (url: string) => {
+    setIsSearching(true);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        setError(await toErrorMessage(response));
+        return null;
+      }
+
+      setError(null);
+      const snapshot = (await response.json()) as WeatherSnapshot;
+      setWeather(snapshot);
+      return snapshot;
+    } catch {
+      setError(FALLBACK_ERROR);
+      return null;
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
+
+  const loadFavorites = useCallback(async () => {
     try {
       const response = await fetch("/api/favorites");
       if (!response.ok) {
         setError(await toErrorMessage(response));
-        return;
+        return null;
       }
 
-      setFavorites((await response.json()) as FavoriteCity[]);
+      const nextFavorites = (await response.json()) as FavoriteCity[];
+      setFavorites(nextFavorites);
+      return nextFavorites;
     } catch {
       setError(FALLBACK_ERROR);
+      return null;
     }
-  };
-
-  useEffect(() => {
-    // Initial sync on mount; updates occur after async fetch completion.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadFavorites();
   }, []);
 
-  const onSearch = async (city: string) => {
-    setIsSearching(true);
+  const loadWeatherForLocation = useCallback(async () => {
+    if (!("geolocation" in navigator)) {
+      return;
+    }
+
     try {
-      const response = await fetch(`/api/weather?city=${encodeURIComponent(city)}`);
-      if (!response.ok) {
-        setError(await toErrorMessage(response));
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+      const { latitude, longitude } = position.coords;
+
+      await loadWeatherFromUrl(`/api/weather/location?lat=${latitude}&lon=${longitude}`);
+    } catch {
+      setError("Unable to load weather for your current location.");
+    }
+  }, [loadWeatherFromUrl]);
+
+  useEffect(() => {
+    const initializeDashboard = async () => {
+      const initialFavorites = await loadFavorites();
+      if (initialFavorites === null) {
         return;
       }
 
-      setError(null);
-      setWeather((await response.json()) as WeatherSnapshot);
-    } catch {
-      setError(FALLBACK_ERROR);
-    } finally {
-      setIsSearching(false);
-    }
+      const firstFavorite = initialFavorites[0];
+      if (firstFavorite) {
+        await loadWeatherFromUrl(`/api/weather?city=${encodeURIComponent(firstFavorite.city)}`);
+        return;
+      }
+
+      await loadWeatherForLocation();
+    };
+
+    void initializeDashboard();
+  }, [loadFavorites, loadWeatherForLocation, loadWeatherFromUrl]);
+
+  const onSearch = async (city: string) => {
+    await loadWeatherFromUrl(`/api/weather?city=${encodeURIComponent(city)}`);
   };
 
   const onAddFavorite = async (city: string) => {

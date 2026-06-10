@@ -39,3 +39,29 @@ export const fetchWeatherByCity = async (city: string): Promise<WeatherSnapshot>
 
   return normalizeWeather(await currentResponse.json(), await forecastResponse.json());
 };
+
+export const fetchWeatherByCoordinates = async (
+  latitude: number,
+  longitude: number,
+): Promise<WeatherSnapshot> => {
+  const apiKey = getApiKey();
+
+  const [currentResponse, forecastResponse] = await Promise.all([
+    fetch(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`,
+    ),
+    fetch(
+      `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`,
+    ),
+  ]);
+
+  if (!currentResponse.ok) {
+    throw new Error(getWeatherErrorMessage(currentResponse.status));
+  }
+
+  if (!forecastResponse.ok) {
+    throw new Error(getWeatherErrorMessage(forecastResponse.status));
+  }
+
+  return normalizeWeather(await currentResponse.json(), await forecastResponse.json());
+};

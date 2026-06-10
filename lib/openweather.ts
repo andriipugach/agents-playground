@@ -51,7 +51,7 @@ export const normalizeWeather = (currentRaw: unknown, forecastRaw: unknown): Wea
       iconUrl: toIconUrl(entry.weather[0].icon),
     }))
     .filter((entry, index, all) => all.findIndex((item) => item.date === entry.date) === index)
-    .slice(0, 3);
+    .slice(0, 5);
 
   return {
     city: current.name,
