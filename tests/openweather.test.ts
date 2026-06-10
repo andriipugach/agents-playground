@@ -77,7 +77,7 @@ describe("seeded mock generator (deterministic 'random' values)", () => {
   });
 
   test("resolveDeniedCity is case-insensitive and trims input", () => {
-    expect(resolveDeniedCity("  kyiv ")).toBe("Kyiv");
+    expect(resolveDeniedCity("  moscow ")).toBe("Moscow");
     expect(resolveDeniedCity("Kyiv")).toBeUndefined();
     expect(resolveDeniedCity(null)).toBeUndefined();
   });

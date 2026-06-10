@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 env:
-  NODE_VERSION: "26.x"
+  NODE_VERSION: "24.x"
   DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
 
 jobs:

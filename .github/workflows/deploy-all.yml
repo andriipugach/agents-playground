@@ -1,4 +1,4 @@
-name: Deploy App and DB
+name: Deploy All
 
 on:
   push:

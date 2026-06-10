@@ -83,9 +83,9 @@ Three deployment workflows are available:
 
 - `Deploy App` (`.github/workflows/deploy-app.yml`) - manually deploys only the Next.js app to Vercel.
 - `Deploy DB` (`.github/workflows/deploy-db.yml`) - manually applies Prisma migrations to Neon with `prisma migrate deploy`.
-- `Deploy App and DB` (`.github/workflows/deploy-all.yml`) - runs on pushes to `main` and can also be started manually; it deploys DB migrations first, then deploys the app.
+- `Deploy All` (`.github/workflows/deploy-all.yml`) - runs on pushes to `main` and can also be started manually; it deploys DB migrations first, then deploys the app.
 
-The workflows use Node.js `26.x`. If GitHub-hosted runners do not have Node 26 available for a given run, change `NODE_VERSION` in the workflow files to the current supported LTS version.
+The workflows use Node.js `24.x` for TypeScript build and deployment steps.
 
 ## Non-Functional Requirements
 
