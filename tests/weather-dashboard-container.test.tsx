@@ -83,8 +83,10 @@ const stubGeolocationSuccess = (latitude: number, longitude: number) => {
         altitudeAccuracy: null,
         heading: null,
         speed: null,
+        toJSON: () => ({}),
       },
       timestamp: 0,
+      toJSON: () => ({}),
     });
   });
 

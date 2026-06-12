@@ -16,9 +16,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "vercel-build": "prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "typecheck": "rm -rf .next/types .next/dev/types && tsc --noEmit",
     "lint-staged": "lint-staged",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
@@ -26,7 +28,9 @@
     "test:watch": "vitest",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate",
     "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:migrate:validate": "prisma migrate deploy && prisma migrate status",
     "prisma:push": "prisma db push",
     "prepare": "husky"
   },

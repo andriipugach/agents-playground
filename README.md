@@ -23,14 +23,18 @@ Leave the flag unset or `false` to use the real API.
 
 - `npm run dev` - start local development server
 - `npm run build` - production build validation
+- `npm run vercel-build` - Vercel build command; applies Prisma migrations, then builds Next.js
 - `npm run start` - run built app
 - `npm run lint` - run ESLint checks
 - `npm run lint:fix` - run ESLint with autofixes
+- `npm run typecheck` - run TypeScript without emitting files
 - `npm run lint-staged` - run staged-file lint/format rules
 - `npm run format` - format the repository with Prettier
 - `npm run format:check` - verify Prettier formatting
 - `npm run prisma:generate` - generate Prisma Client
+- `npm run prisma:validate` - validate the Prisma schema
 - `npm run prisma:migrate:deploy` - apply committed Prisma migrations to the configured database
+- `npm run prisma:migrate:validate` - apply migrations to the configured database and report migration status
 - `npm run prisma:push` - push the Prisma schema directly to the configured database
 - `npm run prepare` - install Husky git hooks
 - `npm test` - run Vitest with coverage
@@ -68,24 +72,38 @@ Leave the flag unset or `false` to use the real API.
 - **Frontend/App hosting:** Vercel
 - **Database hosting:** Neon (EU Central region)
 
-### GitHub Actions Deployments
+### Vercel Git Deployments
 
-Deployment environment variables are managed as GitHub repository secrets. Configure these secrets in **GitHub repo settings > Secrets and variables > Actions** before running the workflows:
+Deployments are managed by the Vercel Git integration:
 
-- `VERCEL_TOKEN` - Vercel access token used by the Vercel CLI
-- `VERCEL_ORG_ID` - Vercel team/user org ID
-- `VERCEL_PROJECT_ID` - Vercel project ID
-- `NEON_DATABASE_URL` - Neon PostgreSQL connection string used for Prisma migrations and runtime database access
-- `OPENWEATHER_API_KEY` - OpenWeatherMap API key used by the deployed app
+- Pushes to `main` deploy to production.
+- Pull requests create preview deployments.
+- `vercel.json` sets the Vercel build command to `npm run vercel-build`, which runs `prisma migrate deploy` before `next build`.
+
+Set production and preview runtime environment variables in the Vercel project settings:
+
+- `OPENWEATHER_API_KEY` - OpenWeatherMap API key used by deployed app routes
 - `WEATHER_USE_MOCKS` - optional, defaults to `false` when unset
 
-Three deployment workflows are available:
+### Neon Vercel Integration
 
-- `Deploy App` (`.github/workflows/deploy-app.yml`) - manually deploys only the Next.js app to Vercel.
-- `Deploy DB` (`.github/workflows/deploy-db.yml`) - manually applies Prisma migrations to Neon with `prisma migrate deploy`.
-- `Deploy All` (`.github/workflows/deploy-all.yml`) - runs on pushes to `main` and can also be started manually; it deploys DB migrations first, then deploys the app.
+Database URLs should come from the Neon Vercel integration instead of GitHub Actions deployment secrets:
 
-The workflows use Node.js `24.x` for TypeScript build and deployment steps.
+- Production deployments use the Neon `main` branch.
+- Preview deployments receive isolated Neon branches.
+- The injected `DATABASE_URL` is used by Prisma during `npm run vercel-build`, so migrations apply to the same Neon branch that the deployment will use at runtime.
+
+### GitHub Actions Validation
+
+GitHub Actions runs `.github/workflows/ci.yml` on pull requests and pushes to `main`. It validates:
+
+- ESLint
+- TypeScript
+- Vitest unit/integration tests with coverage
+- Next.js production build
+- Prisma schema and migrations against a temporary PostgreSQL service
+
+The workflows use Node.js `24.x`.
 
 ## Non-Functional Requirements
 
