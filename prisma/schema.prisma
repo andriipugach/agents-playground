@@ -6,8 +6,31 @@ datasource db {
   provider = "postgresql"
 }
 
+model Device {
+  id           String         @id
+  createdAt    DateTime       @default(now())
+  favorites    FavoriteCity[]
+  loadedCities LoadedCity[]
+}
+
 model FavoriteCity {
   id        Int      @id @default(autoincrement())
-  city      String   @unique
+  deviceId  String
+  city      String
   createdAt DateTime @default(now())
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@unique([deviceId, city])
+  @@index([deviceId])
+}
+
+model LoadedCity {
+  id        Int      @id @default(autoincrement())
+  deviceId  String
+  city      String
+  country   String?
+  createdAt DateTime @default(now())
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId, createdAt])
 }

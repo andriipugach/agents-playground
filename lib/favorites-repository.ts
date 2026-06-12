@@ -2,13 +2,26 @@ import { createFavoritesService } from "@/lib/favorites-service";
 import { prisma } from "@/lib/prisma";
 
 const repository = {
-  async list() {
-    return prisma.favoriteCity.findMany({ orderBy: { city: "asc" } });
+  async list(deviceId: string) {
+    return prisma.favoriteCity.findMany({
+      where: { deviceId },
+      orderBy: { city: "asc" },
+    });
   },
 
-  async create(city: string) {
+  async create(deviceId: string, city: string) {
     try {
-      return await prisma.favoriteCity.create({ data: { city } });
+      return await prisma.favoriteCity.create({
+        data: {
+          city,
+          device: {
+            connectOrCreate: {
+              where: { id: deviceId },
+              create: { id: deviceId },
+            },
+          },
+        },
+      });
     } catch (error) {
       if (isUniqueConstraintError(error)) {
         throw new Error("duplicate", { cause: error });
@@ -18,8 +31,8 @@ const repository = {
     }
   },
 
-  async remove(id: number) {
-    await prisma.favoriteCity.deleteMany({ where: { id } });
+  async remove(deviceId: string, id: number) {
+    await prisma.favoriteCity.deleteMany({ where: { id, deviceId } });
   },
 };
 

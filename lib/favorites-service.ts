@@ -7,15 +7,15 @@ type FavoriteCityRow = {
 };
 
 export type FavoritesRepository = {
-  list: () => Promise<FavoriteCityRow[]>;
-  create: (city: string) => Promise<FavoriteCityRow>;
-  remove: (id: number) => Promise<void>;
+  list: (deviceId: string) => Promise<FavoriteCityRow[]>;
+  create: (deviceId: string, city: string) => Promise<FavoriteCityRow>;
+  remove: (deviceId: string, id: number) => Promise<void>;
 };
 
 type FavoritesService = {
-  list: () => Promise<FavoriteCity[]>;
-  add: (city: string) => Promise<FavoriteCity>;
-  remove: (id: number) => Promise<void>;
+  list: (deviceId: string) => Promise<FavoriteCity[]>;
+  add: (deviceId: string, city: string) => Promise<FavoriteCity>;
+  remove: (deviceId: string, id: number) => Promise<void>;
 };
 
 const toDto = (row: FavoriteCityRow): FavoriteCity => ({
@@ -25,19 +25,19 @@ const toDto = (row: FavoriteCityRow): FavoriteCity => ({
 });
 
 export const createFavoritesService = (repository: FavoritesRepository): FavoritesService => ({
-  async list() {
-    const rows = await repository.list();
+  async list(deviceId: string) {
+    const rows = await repository.list(deviceId);
     return rows.map(toDto);
   },
 
-  async add(city: string) {
+  async add(deviceId: string, city: string) {
     const normalizedCity = city.trim();
     if (!normalizedCity) {
       throw new Error("City is required");
     }
 
     try {
-      const row = await repository.create(normalizedCity);
+      const row = await repository.create(deviceId, normalizedCity);
       return toDto(row);
     } catch (error) {
       if (error instanceof Error && /duplicate/i.test(error.message)) {
@@ -48,7 +48,7 @@ export const createFavoritesService = (repository: FavoritesRepository): Favorit
     }
   },
 
-  async remove(id: number) {
-    await repository.remove(id);
+  async remove(deviceId: string, id: number) {
+    await repository.remove(deviceId, id);
   },
 });
