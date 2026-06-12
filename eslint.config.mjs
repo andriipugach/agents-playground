@@ -6,15 +6,7 @@ import tseslint from "typescript-eslint";
 
 const eslintConfig = [
   {
-    ignores: [
-      ".agents/**",
-      ".next/**",
-      "coverage/**",
-      "data/favorites.json",
-      "docs/**",
-      "node_modules/**",
-      "out/**",
-    ],
+    ignores: [".agents/**", ".next/**", "coverage/**", "docs/**", "node_modules/**", "out/**"],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

@@ -166,6 +166,24 @@ describe("WeatherDashboardContainer", () => {
     expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/weather/location?lat=50.45&lon=30.52");
   });
 
+  test("still asks for browser location when favorites fail during startup", async () => {
+    const getCurrentPosition = stubGeolocationSuccess(50.45, 30.52);
+
+    fetchMock.mockResolvedValueOnce(new Response("invalid-json", { status: 500 }));
+    fetchMock.mockResolvedValueOnce(jsonResponse(weatherSnapshot));
+
+    render(<WeatherDashboardContainer />);
+
+    await waitFor(() => {
+      expect(getLatestProps().weather).toEqual(weatherSnapshot);
+    });
+
+    expect(getCurrentPosition).toHaveBeenCalledOnce();
+    expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/favorites");
+    expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/weather/location?lat=50.45&lon=30.52");
+    expect(getLatestProps().error).toBeNull();
+  });
+
   test("onSearch shows fallback error when fetch rejects", async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse([]));
     fetchMock.mockRejectedValueOnce(new Error("network"));

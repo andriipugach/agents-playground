@@ -60,7 +60,7 @@ Leave the flag unset or `false` to use the real API.
 - `Testing Library` (`@testing-library/react` `16`, `@testing-library/jest-dom` `6`, `@testing-library/user-event` `14`)
 - `MSW` (`msw` `2`) for stable API mocking in tests
 - `Zod` `4` for strict schema validation and runtime-safe parsing
-- `Prisma` dependencies are installed and schema is included for future DB-backed favorites; current local favorites persistence uses a JSON file at `data/favorites.json`
+- Favorites are persisted through Prisma using the configured PostgreSQL database.
 
 ## Git Hooks
 
@@ -83,6 +83,7 @@ Deployments are managed by the Vercel Git integration:
 Set production and preview runtime environment variables in the Vercel project settings:
 
 - `OPENWEATHER_API_KEY` - OpenWeatherMap API key used by deployed app routes
+- `DATABASE_URL` - PostgreSQL connection string used by Prisma for favorites
 - `WEATHER_USE_MOCKS` - optional, defaults to `false` when unset
 
 ### Neon Vercel Integration

@@ -79,11 +79,15 @@ export const WeatherDashboardContainer = () => {
   useEffect(() => {
     const initializeDashboard = async () => {
       const initialFavorites = await loadFavorites();
-      if (initialFavorites === null) {
+
+      if (!initialFavorites?.length) {
+        await loadWeatherForLocation();
+
         return;
       }
 
       const firstFavorite = initialFavorites[0];
+
       if (firstFavorite) {
         await loadWeatherFromUrl(`/api/weather?city=${encodeURIComponent(firstFavorite.city)}`);
         return;
