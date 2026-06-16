@@ -48,6 +48,27 @@ Leave the flag unset or `false` to use the real API.
 - Favorites list with add/load/remove actions.
 - Graceful fallback errors for invalid city and upstream failures.
 
+## Analytics API
+
+`POST /api/analytics` returns one public analytics metric for an explicit interval.
+
+Example request:
+
+```json
+{
+  "metric": "topLoadedCities",
+  "from": "2026-06-09T00:00:00.000Z",
+  "to": "2026-06-16T00:00:00.000Z",
+  "limit": 5
+}
+```
+
+Supported metrics are `favoritesPerDevice`, `loadedCitiesPerCountry`, `topLoadedCities`, `devicesAddedPerDay`, `topFavoritedCities`, `favoriteAddsPerDay`, and `uniqueDevicesLoadingCities`.
+
+`limit` is required for `topLoadedCities` and `topFavoritedCities`; other metrics reject `limit`. Ranked metric limits are capped at 100, and all analytics intervals are capped at 366 days.
+
+`favoritesPerDevice` returns deterministic response-local device labels such as `device-1` and `device-2`; it does not expose raw device cookie IDs.
+
 ## Tech Stack
 
 - `Next.js` `16`
