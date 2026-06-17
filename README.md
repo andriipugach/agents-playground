@@ -14,6 +14,11 @@ A Weather Dashboard built with Next.js. The app lets users search for a city, vi
    - `npm run dev`
 4. Open [http://localhost:3000](http://localhost:3000)
 
+## API Documentation
+
+- Swagger UI: [http://localhost:3000/docs/api](http://localhost:3000/docs/api)
+- OpenAPI JSON: [http://localhost:3000/api/openapi.json](http://localhost:3000/api/openapi.json)
+
 ### Mocked weather data (offline / no API key)
 
 Set `WEATHER_USE_MOCKS=true` in your env file to serve all weather requests from MSW mock handlers instead of the live OpenWeatherMap API. This lets you run the app without a valid `OPENWEATHER_API_KEY`. The mocks (`tests/msw/city-search-handlers.ts`) return randomized-but-deterministic weather for every other city.
