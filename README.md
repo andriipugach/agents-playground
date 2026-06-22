@@ -74,6 +74,43 @@ Supported metrics are `favoritesPerDevice`, `loadedCitiesPerCountry`, `topLoaded
 
 `favoritesPerDevice` returns deterministic response-local device labels such as `device-1` and `device-2`; it does not expose raw device cookie IDs.
 
+## Local Analytics MCP Server
+
+The repository includes a standalone TypeScript MCP server for querying the deployed analytics API from an AI chat client. It lives in `mcp/analytics/`, is run with `tsx`, and is not imported by the Next.js app or bundled into the application build.
+
+The server exposes one tool:
+
+- `get_analytics_metric` - sends `metric`, `from`, `to`, and optional `limit` to `POST /api/analytics`.
+
+The MCP server loads the OpenAPI contract from `https://weather-dashboard-apug.vercel.app/api/openapi.json` at startup to describe the tool input schema. It does not perform local analytics validation; invalid metric rules, date ranges, or limits are sent to the HTTP API and returned to the chat client as MCP tool errors with the upstream HTTP status and response body.
+
+Run it locally over Streamable HTTP:
+
+```bash
+npm run mcp:analytics
+```
+
+The endpoint defaults to `http://127.0.0.1:3333/mcp`. This is useful when an MCP client outside Cursor needs to connect by URL while you debug the process from Cursor.
+
+Optional environment overrides:
+
+```bash
+ANALYTICS_OPENAPI_URL=http://localhost:3000/api/openapi.json \
+ANALYTICS_API_BASE_URL=http://localhost:3000 \
+npm run mcp:analytics
+```
+
+HTTP server overrides:
+
+```bash
+MCP_HOST=127.0.0.1 MCP_PORT=4444 MCP_ENDPOINT=/mcp npm run mcp:analytics
+```
+
+Debug options:
+
+- Run `npm run mcp:analytics:debug`, attach a Node debugger to the printed inspector URL, then connect an external MCP client to `http://127.0.0.1:3333/mcp`.
+- Run `npm run mcp:analytics:inspect` to open the MCP Inspector, then connect it to the local Streamable HTTP endpoint.
+
 ## Tech Stack
 
 - `Next.js` `16`
