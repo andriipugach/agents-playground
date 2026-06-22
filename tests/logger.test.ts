@@ -28,6 +28,23 @@ describe("logger", () => {
     expect(pinoMock).toHaveBeenCalledWith(expect.objectContaining({ level: "debug" }));
   });
 
+  test("formats logs with pino-pretty", async () => {
+    await import("@/lib/logger");
+
+    expect(pinoMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        transport: {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+            ignore: "pid,hostname",
+            translateTime: "SYS:standard",
+          },
+        },
+      }),
+    );
+  });
+
   test("allows LOG_LEVEL to override the default level", async () => {
     process.env.LOG_LEVEL = "info";
 

@@ -13,6 +13,7 @@ import {
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
 import type { Request, Response } from "express";
+import { logger } from "../../lib/logger.js";
 import { AnalyticsHttpError, fetchAnalyticsMetric } from "./client.js";
 
 const defaultOpenApiUrl = "https://weather-dashboard-apug.vercel.app/api/openapi.json";
@@ -53,16 +54,43 @@ const isJsonObject = (value: unknown): value is JsonObject =>
 
 const isInitializeRequest = (body: unknown) => isJsonObject(body) && body.method === "initialize";
 
-const fetchOpenApiDocument = async (openApiUrl: string) => {
-  const response = await fetch(openApiUrl, { headers: { accept: "application/json" } });
+export const getToolCallLogContext = (arguments_: unknown) => {
+  const hasLimit = isJsonObject(arguments_) && "limit" in arguments_;
+  const metric =
+    isJsonObject(arguments_) && typeof arguments_.metric === "string"
+      ? arguments_.metric
+      : undefined;
+  const context: { hasLimit: boolean; metric?: string } = { hasLimit };
 
-  if (!response.ok) {
-    throw new Error(`Failed to load OpenAPI spec from ${openApiUrl}: HTTP ${response.status}`);
+  if (metric) {
+    context.metric = metric;
   }
 
-  return (await response.json()) as JsonObject;
+  return context;
 };
 
+// The MCP tool mirrors the app's published OpenAPI schema
+// so clients see the same request contract as the HTTP API.
+const fetchOpenApiDocument = async (openApiUrl: string) => {
+  logger.info({ openApiUrl }, "Loading analytics OpenAPI document");
+
+  try {
+    const response = await fetch(openApiUrl, { headers: { accept: "application/json" } });
+
+    if (!response.ok) {
+      throw new Error(`Failed to load OpenAPI spec from ${openApiUrl}: HTTP ${response.status}`);
+    }
+
+    logger.info({ openApiUrl }, "Loaded analytics OpenAPI document");
+
+    return (await response.json()) as JsonObject;
+  } catch (error) {
+    logger.error({ err: error, openApiUrl }, "Failed to load analytics OpenAPI document");
+    throw error;
+  }
+};
+
+// Keep schema extraction strict so startup fails before exposing a broken tool.
 const getAnalyticsRequestSchema = (openApiDocument: JsonObject): JsonObject => {
   const components = isJsonObject(openApiDocument.components) ? openApiDocument.components : {};
   const schemas = isJsonObject(components.schemas) ? components.schemas : {};
@@ -75,6 +103,7 @@ const getAnalyticsRequestSchema = (openApiDocument: JsonObject): JsonObject => {
   return analyticsRequest;
 };
 
+// Tool descriptions come from OpenAPI plus the metric enum for quick discovery.
 const getAnalyticsDescription = (
   openApiDocument: JsonObject,
   analyticsRequestSchema: JsonObject,
@@ -95,6 +124,7 @@ const getAnalyticsDescription = (
   return `${summary}. Supported metrics: ${supportedMetrics.join(", ")}. The Weather Dashboard API performs request validation and returns HTTP errors for invalid analytics requests.`;
 };
 
+// Each MCP session gets its own server instance bound to a Streamable HTTP transport.
 const createServer = (openApiDocument: JsonObject, config: AnalyticsServerConfig) => {
   const analyticsRequestSchema = getAnalyticsRequestSchema(openApiDocument);
   const server = new McpServer(
@@ -106,26 +136,38 @@ const createServer = (openApiDocument: JsonObject, config: AnalyticsServerConfig
     },
   );
 
-  server.server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: [
-      {
-        name: toolName,
-        title: "Get Analytics Metric",
-        description: getAnalyticsDescription(openApiDocument, analyticsRequestSchema),
-        inputSchema: analyticsRequestSchema,
-      },
-    ],
-  }));
+  server.server.setRequestHandler(ListToolsRequestSchema, async () => {
+    const analyticsMetricsTool = {
+      name: toolName,
+      title: "Get Analytics Metric",
+      description: getAnalyticsDescription(openApiDocument, analyticsRequestSchema),
+      inputSchema: analyticsRequestSchema,
+    };
+
+    return {
+      tools: [analyticsMetricsTool],
+    };
+  });
 
   server.server.setRequestHandler(CallToolRequestSchema, async (request) => {
     if (request.params.name !== toolName) {
+      logger.warn({ requestedTool: request.params.name }, "Rejected unknown analytics MCP tool");
       throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${request.params.name}`);
     }
 
+    const toolContext = getToolCallLogContext(request.params.arguments);
+
     try {
+      logger.info(
+        { apiBaseUrl: config.apiBaseUrl, toolName, ...toolContext },
+        "Calling analytics MCP tool",
+      );
+
       const data = await fetchAnalyticsMetric(request.params.arguments ?? {}, {
         apiBaseUrl: config.apiBaseUrl,
       });
+
+      logger.debug({ toolName, ...toolContext }, "Analytics MCP tool call succeeded");
 
       return {
         content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
@@ -133,6 +175,11 @@ const createServer = (openApiDocument: JsonObject, config: AnalyticsServerConfig
       };
     } catch (error) {
       if (error instanceof AnalyticsHttpError) {
+        logger.warn(
+          { err: error, status: error.status, toolName, ...toolContext },
+          "Analytics API returned an error for MCP tool call",
+        );
+
         return {
           isError: true,
           content: [
@@ -155,6 +202,8 @@ const createServer = (openApiDocument: JsonObject, config: AnalyticsServerConfig
         };
       }
 
+      logger.error({ err: error, toolName, ...toolContext }, "Analytics MCP tool call failed");
+
       return {
         isError: true,
         content: [
@@ -173,10 +222,13 @@ const createServer = (openApiDocument: JsonObject, config: AnalyticsServerConfig
 const startHttpServer = async () => {
   const config = getConfig();
   const httpConfig = getHttpConfig();
+  logger.info({ ...config, ...httpConfig }, "Starting analytics MCP HTTP server");
   const openApiDocument = await fetchOpenApiDocument(config.openApiUrl);
   const app = createMcpExpressApp({ host: httpConfig.host });
   const transports = new Map<string, StreamableHTTPServerTransport>();
 
+  // Streamable HTTP routes follow the MCP session lifecycle: initialize first,
+  // then reuse the returned mcp-session-id on later requests.
   app.all(httpConfig.endpoint, async (request: Request, response: Response) => {
     try {
       const sessionId = request.headers["mcp-session-id"];
@@ -189,11 +241,13 @@ const startHttpServer = async () => {
           onsessioninitialized: (newSessionId) => {
             if (transport) {
               transports.set(newSessionId, transport);
+              logger.info({ sessionId: newSessionId }, "Initialized analytics MCP session");
             }
           },
         });
         transport.onclose = () => {
           if (transport?.sessionId) {
+            logger.info({ sessionId: transport.sessionId }, "Closed analytics MCP session");
             transports.delete(transport.sessionId);
           }
         };
@@ -202,6 +256,11 @@ const startHttpServer = async () => {
       }
 
       if (!transport) {
+        logger.warn(
+          { method: request.method, sessionId: normalizedSessionId },
+          "Rejected analytics MCP request without an initialized session",
+        );
+
         response.status(400).json({
           jsonrpc: "2.0",
           error: {
@@ -215,7 +274,7 @@ const startHttpServer = async () => {
 
       await transport.handleRequest(request, response, request.body);
     } catch (error) {
-      console.error("Error handling analytics MCP HTTP request:", error);
+      logger.error({ err: error }, "Error handling analytics MCP HTTP request");
 
       if (!response.headersSent) {
         response.status(500).json({
@@ -232,11 +291,21 @@ const startHttpServer = async () => {
     server.on("error", reject);
   });
 
-  console.error(
-    `Weather Dashboard analytics MCP HTTP server ready at http://${httpConfig.host}:${httpConfig.port}${httpConfig.endpoint}. OpenAPI: ${config.openApiUrl}. API: ${config.apiBaseUrl}.`,
+  logger.info(
+    {
+      apiBaseUrl: config.apiBaseUrl,
+      endpoint: httpConfig.endpoint,
+      host: httpConfig.host,
+      openApiUrl: config.openApiUrl,
+      port: httpConfig.port,
+      url: `http://${httpConfig.host}:${httpConfig.port}${httpConfig.endpoint}`,
+    },
+    "Weather Dashboard analytics MCP HTTP server ready",
   );
 
   process.on("SIGINT", () => {
+    logger.info({ sessions: transports.size }, "Shutting down analytics MCP HTTP server");
+
     for (const transport of transports.values()) {
       void transport.close();
     }
@@ -254,7 +323,7 @@ const isDirectRun = process.argv[1]
 
 if (isDirectRun) {
   main().catch((error) => {
-    console.error("Analytics MCP server failed to start:", error);
+    logger.error({ err: error }, "Analytics MCP server failed to start");
     process.exit(1);
   });
 }

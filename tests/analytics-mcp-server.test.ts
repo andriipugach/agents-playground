@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { getHttpConfig } from "@/mcp/analytics/server";
+import { getHttpConfig, getToolCallLogContext } from "@/mcp/analytics/server";
 
 describe("analytics MCP server config", () => {
   test("uses localhost HTTP defaults", () => {
@@ -21,6 +21,21 @@ describe("analytics MCP server config", () => {
       host: "localhost",
       port: 4444,
       endpoint: "/analytics-mcp",
+    });
+  });
+
+  test("logs only high-signal tool call context", () => {
+    expect(
+      getToolCallLogContext({
+        metric: "topLoadedCities",
+        from: "2026-06-09T00:00:00.000Z",
+        to: "2026-06-16T00:00:00.000Z",
+        limit: 5,
+        ignored: "do not log",
+      }),
+    ).toEqual({
+      metric: "topLoadedCities",
+      hasLimit: true,
     });
   });
 });
