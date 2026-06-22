@@ -8,6 +8,7 @@ vi.mock("pino", () => ({
 
 describe("logger", () => {
   const originalLogLevel = process.env.LOG_LEVEL;
+  const originalVercel = process.env.VERCEL;
 
   beforeEach(() => {
     vi.resetModules();
@@ -17,6 +18,12 @@ describe("logger", () => {
       delete process.env.LOG_LEVEL;
     } else {
       process.env.LOG_LEVEL = originalLogLevel;
+    }
+
+    if (originalVercel === undefined) {
+      delete process.env.VERCEL;
+    } else {
+      process.env.VERCEL = originalVercel;
     }
   });
 
@@ -51,5 +58,17 @@ describe("logger", () => {
     await import("@/lib/logger");
 
     expect(pinoMock).toHaveBeenCalledWith(expect.objectContaining({ level: "info" }));
+  });
+
+  test("does not configure pino-pretty on Vercel", async () => {
+    process.env.VERCEL = "1";
+
+    await import("@/lib/logger");
+
+    expect(pinoMock).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        transport: expect.objectContaining({ target: "pino-pretty" }),
+      }),
+    );
   });
 });
