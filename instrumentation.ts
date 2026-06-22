@@ -15,9 +15,10 @@ export const register = async (): Promise<void> => {
 
   const { setupServer } = await import("msw/node");
   const { citySearchHandlers } = await import("@/tests/msw/city-search-handlers");
+  const { logger } = await import("@/lib/logger");
 
   const server = setupServer(...citySearchHandlers);
   server.listen({ onUnhandledRequest: "bypass" });
 
-  console.info("[MSW] Weather API mocking enabled (WEATHER_USE_MOCKS=true)");
+  logger.info("[MSW] Weather API mocking enabled (WEATHER_USE_MOCKS=true)");
 };
